@@ -1,6 +1,6 @@
 import nose
 from nose.tools import assert_raises, raises
-from bouncer import authorization_target, authorization_method, Ability, can, cannot, ensure
+from bouncer import authorization_target, authorization_method, custom_subject_matcher, Ability, can, cannot, ensure
 from bouncer.exceptions import AccessDenied
 from bouncer.constants import *
 from models import User, Article, BlogPost
@@ -168,7 +168,6 @@ def test_finding_relivant_rules():
     assert relevant_rules[0].actions == [EDIT]
     assert relevant_rules[0].subjects == [Article]
 
-
 def test_using_class_strings():
 
     @authorization_method
@@ -187,6 +186,31 @@ def test_using_class_strings():
     # Can edit specific article
     assert sally.can(EDIT, article)
 
+
+def test_using_custom_subject_function():
+
+    class TestAuth:
+        name = 'Test'
+
+    try:
+        @custom_subject_matcher
+        def subject_match(rule, subject):
+            for subject in rule.subjects:
+                if subject == TestAuth.name:
+                    return True
+            return False
+
+        @authorization_method
+        def authorize(user, they):
+            they.can(READ, 'Test')
+
+        article = Article()
+        sally = User(name='sally', admin=False)
+
+        assert sally.can(READ, article)
+
+    finally:
+        custom_subject_matcher(None)
 
 def test_cannot_override():
 

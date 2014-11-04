@@ -54,6 +54,13 @@ def get_authorization_method():
 
 _authorization_target = None
 
+def custom_subject_matcher(original_method):
+    """The method which extends the usual subject matching process of a subject"""
+    Rule._custom_subject_matcher = original_method
+    return original_method
+
+def get_custom_subject_matcher():
+    return Rule._custom_subject_matcher
 
 def authorization_target(original_class):
     """ Add bouncer goodness to the model.  This is a class decorator, when added to your User model if will add

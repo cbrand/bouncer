@@ -18,6 +18,9 @@ def listify(list_or_single):
 
 
 class Rule(object):
+
+    _custom_subject_matcher = None
+
     def __init__(self, base_behavior, action, subject, conditions=None, **conditions_hash):
         self.base_behavior = base_behavior
         self.actions = listify(action)
@@ -92,6 +95,10 @@ class Rule(object):
                     return subject.__name__ == sub
                 else:
                     return subject.__class__.__name__ == sub
+
+        if callable(Rule._custom_subject_matcher):
+            return Rule._custom_subject_matcher(self, subject)
+
         return False
 
 
